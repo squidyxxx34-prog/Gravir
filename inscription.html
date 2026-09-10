@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inscription — Gravir</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --bg: #20221D;
+  --panel: #2A2C25;
+  --line: #3B3E33;
+  --text: #EEEAE0;
+  --muted: #A6A895;
+  --accent: #C4622D;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+}
+
+h1, h2, h3, .font-display {
+  font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin: 0;
+}
+
+a { color: inherit; }
+
+/* ---------- Header / nav ---------- */
+.site-header {
+  border-bottom: 1px solid var(--line);
+  padding: 18px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.logo { font-size: 26px; }
+.logo span { color: var(--accent); }
+.site-nav { display: flex; gap: 22px; align-items: center; }
+.site-nav a {
+  text-decoration: none;
+  font-size: 14px;
+  color: var(--muted);
+  transition: color .15s;
+}
+.site-nav a:hover, .site-nav a.active { color: var(--text); }
+.nav-cta {
+  background: var(--accent);
+  color: #fff !important;
+  padding: 8px 16px;
+  border-radius: 2px;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  padding: 11px 20px;
+  border-radius: 2px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color .15s, background .15s;
+}
+.btn:hover { border-color: var(--accent); }
+.btn-accent {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.btn-accent:hover { background: #A6531F; }
+.btn-block { width: 100%; justify-content: center; }
+
+/* ---------- Forms ---------- */
+.field { margin-bottom: 16px; }
+.field label {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.field input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 11px 12px;
+  border-radius: 2px;
+  font-size: 15px;
+  font-family: inherit;
+}
+.field input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.form-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 32px;
+  max-width: 420px;
+  margin: 0 auto;
+}
+.form-error {
+  background: #4A2A22;
+  border: 1px solid #8A1F1F;
+  color: #F2C4B6;
+  font-size: 13px;
+  padding: 10px 12px;
+  border-radius: 2px;
+  margin-bottom: 16px;
+}
+.form-success {
+  background: #29352A;
+  border: 1px solid #3D6E4F;
+  color: #CFE6D3;
+  font-size: 13px;
+  padding: 10px 12px;
+  border-radius: 2px;
+  margin-bottom: 16px;
+}
+
+/* ---------- Footer ---------- */
+.site-footer {
+  border-top: 1px solid var(--line);
+  padding: 24px 28px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.container { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+
+</style>
+<style>
+  main { padding: 70px 28px; }
+  .lede { text-align:center; color: var(--muted); font-size: 14px; max-width: 420px; margin: 0 auto 24px; }
+
+  @media (max-width: 560px) {
+    .site-header { padding: 14px 18px; }
+    .site-nav { gap: 12px; width: 100%; justify-content: space-between; }
+    .logo { font-size: 22px; }
+    main { padding: 40px 18px; }
+    .form-card { padding: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="index.html" class="logo">GRAVIR <span>·</span></a>
+  <nav class="site-nav">
+    <a href="index.html">Accueil</a>
+    <a href="configurateur.html">Configurateur</a>
+    <a href="compte.html">Mon compte</a>
+    <a href="inscription.html" class="nav-cta active">Inscription</a>
+  </nav>
+</header>
+
+<main>
+  <p class="lede">Créez un compte pour enregistrer vos builds et les retrouver plus tard.</p>
+  <div class="form-card">
+    <h2 style="font-size:26px;margin-bottom:20px;">Créer un compte</h2>
+    <div id="signupError"></div>
+    <form id="signupForm">
+      <div class="field"><label>Nom</label><input type="text" id="name" required></div>
+      <div class="field"><label>E-mail</label><input type="email" id="email" required></div>
+      <div class="field"><label>Mot de passe</label><input type="password" id="password" minlength="6" required></div>
+      <button class="btn btn-accent btn-block" type="submit">Créer mon compte</button>
+    </form>
+    <p style="font-size:13px;color:var(--muted);margin-top:16px;text-align:center;">
+      Déjà inscrit ? <a href="compte.html" style="color:var(--accent);">Se connecter</a>
+    </p>
+  </div>
+</main>
+
+<footer class="site-footer">Gravir — configurateur communautaire, non affilié aux marques citées.</footer>
+<script>
+// Auth Supabase (projet "gravir-vtt")
+const SUPABASE_URL = "https://awqfdmhevdqlepqmhhss.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_pDKtP8gRUZinq8AAmCAPBA_TuCN2JWE";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function registerUser(name, email, password) {
+  const { data, error } = await sb.auth.signUp({ email, password, options: { data: { name } } });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, needsConfirmation: !data.session };
+}
+</script>
+<script>
+document.getElementById("signupForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const submitBtn = e.target.querySelector("button[type=submit]");
+  submitBtn.disabled = true;
+  const res = await registerUser(name, email, password);
+  submitBtn.disabled = false;
+  const errBox = document.getElementById("signupError");
+  if (!res.ok) {
+    errBox.innerHTML = `<div class="form-error">${res.error}</div>`;
+    return;
+  }
+  if (res.needsConfirmation) {
+    errBox.innerHTML = `<div class="form-success">Compte créé. Vérifiez votre boîte mail pour confirmer votre adresse, puis connectez-vous.</div>`;
+    e.target.reset();
+    return;
+  }
+  window.location.href = "compte.html";
+});
+</script>
+</body>
+</html>

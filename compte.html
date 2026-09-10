@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mon compte — Gravir</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --bg: #20221D;
+  --panel: #2A2C25;
+  --line: #3B3E33;
+  --text: #EEEAE0;
+  --muted: #A6A895;
+  --accent: #C4622D;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+}
+
+h1, h2, h3, .font-display {
+  font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin: 0;
+}
+
+a { color: inherit; }
+
+/* ---------- Header / nav ---------- */
+.site-header {
+  border-bottom: 1px solid var(--line);
+  padding: 18px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.logo { font-size: 26px; }
+.logo span { color: var(--accent); }
+.site-nav { display: flex; gap: 22px; align-items: center; }
+.site-nav a {
+  text-decoration: none;
+  font-size: 14px;
+  color: var(--muted);
+  transition: color .15s;
+}
+.site-nav a:hover, .site-nav a.active { color: var(--text); }
+.nav-cta {
+  background: var(--accent);
+  color: #fff !important;
+  padding: 8px 16px;
+  border-radius: 2px;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  padding: 11px 20px;
+  border-radius: 2px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color .15s, background .15s;
+}
+.btn:hover { border-color: var(--accent); }
+.btn-accent {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.btn-accent:hover { background: #A6531F; }
+.btn-block { width: 100%; justify-content: center; }
+
+/* ---------- Forms ---------- */
+.field { margin-bottom: 16px; }
+.field label {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.field input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 11px 12px;
+  border-radius: 2px;
+  font-size: 15px;
+  font-family: inherit;
+}
+.field input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.form-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 32px;
+  max-width: 420px;
+  margin: 0 auto;
+}
+.form-error {
+  background: #4A2A22;
+  border: 1px solid #8A1F1F;
+  color: #F2C4B6;
+  font-size: 13px;
+  padding: 10px 12px;
+  border-radius: 2px;
+  margin-bottom: 16px;
+}
+.form-success {
+  background: #29352A;
+  border: 1px solid #3D6E4F;
+  color: #CFE6D3;
+  font-size: 13px;
+  padding: 10px 12px;
+  border-radius: 2px;
+  margin-bottom: 16px;
+}
+
+/* ---------- Footer ---------- */
+.site-footer {
+  border-top: 1px solid var(--line);
+  padding: 24px 28px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.container { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+
+</style>
+<style>
+  main { padding: 60px 28px; }
+  .dash-head { display:flex; align-items:center; justify-content:space-between; max-width: 800px; margin: 0 auto 24px; }
+  .dash-head h2 { font-size: 30px; }
+  .builds { max-width: 800px; margin: 0 auto; display: grid; gap: 14px; }
+  .build-card { border: 1px solid var(--line); background: var(--panel); border-radius: 3px; padding: 18px 20px; }
+  .build-card .top { display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 8px; }
+  .build-card .date { font-size: 12px; color: var(--muted); }
+  .build-card .total { font-family:'Barlow Condensed'; font-weight:700; font-size: 22px; color: var(--accent); }
+  .build-card ul { list-style: none; padding: 0; margin: 0; font-size: 13px; color: var(--muted); }
+  .build-card li { padding: 2px 0; }
+  .build-card .del { margin-top: 10px; font-size: 12px; color: var(--muted); background: none; border: none; cursor: pointer; text-decoration: underline dotted; }
+  .build-card .del:hover { color: var(--accent); }
+  .empty { text-align:center; color: var(--muted); max-width: 800px; margin: 0 auto; }
+
+  @media (max-width: 560px) {
+    .site-header { padding: 14px 18px; }
+    .site-nav { gap: 12px; width: 100%; justify-content: space-between; }
+    .logo { font-size: 22px; }
+    main { padding: 32px 18px; }
+    .form-card { padding: 22px; }
+    .dash-head { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .dash-head h2 { font-size: 24px; }
+    .build-card { padding: 14px 16px; }
+    .build-card .total { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="index.html" class="logo">GRAVIR <span>·</span></a>
+  <nav class="site-nav">
+    <a href="index.html">Accueil</a>
+    <a href="configurateur.html">Configurateur</a>
+    <a href="compte.html" class="active">Mon compte</a>
+    <a href="inscription.html" class="nav-cta">Inscription</a>
+  </nav>
+</header>
+
+<main>
+  <!-- Formulaire de connexion -->
+  <div id="loginView" class="form-card">
+    <h2 style="font-size:26px;margin-bottom:20px;">Connexion</h2>
+    <div id="loginError"></div>
+    <form id="loginForm">
+      <div class="field"><label>E-mail</label><input type="email" id="loginEmail" required></div>
+      <div class="field"><label>Mot de passe</label><input type="password" id="loginPassword" required></div>
+      <button class="btn btn-accent btn-block" type="submit">Se connecter</button>
+    </form>
+    <p style="font-size:13px;color:var(--muted);margin-top:16px;text-align:center;">
+      Pas de compte ? <a href="inscription.html" style="color:var(--accent);">Créer un compte</a>
+    </p>
+  </div>
+
+  <!-- Tableau de bord -->
+  <div id="dashView" style="display:none;">
+    <div class="dash-head">
+      <div>
+        <h2 id="welcomeMsg"></h2>
+        <p style="color:var(--muted);font-size:13px;margin-top:4px;" id="userEmail"></p>
+      </div>
+      <button class="btn" id="logoutBtn">Se déconnecter</button>
+    </div>
+    <div class="builds" id="buildsList"></div>
+  </div>
+</main>
+
+<footer class="site-footer">Gravir — configurateur communautaire, non affilié aux marques citées.</footer>
+<script>
+// ---------- DONNÉES ----------
+// Specs approximatives (géométrie publique constructeur, à vérifier/enrichir avant prod)
+
+const FRAMES = [
+  { id: "commencal-meta-am", brand: "Commencal", name: "Meta AM 29", travel: 150, bb: "BSA73", shockEye: 210, shockStroke: 55, seatTube: 31.6, wheel: "29", axle: "12x148", brakeMount: "PM180", price: 2199, color: "#C4622D" },
+  { id: "yt-capra", brand: "YT", name: "Capra 29", travel: 170, bb: "BSA73", shockEye: 230, shockStroke: 65, seatTube: 31.6, wheel: "29", axle: "12x148", brakeMount: "PM180", price: 2799, color: "#3D6E4F" },
+  { id: "canyon-strive", brand: "Canyon", name: "Strive", travel: 150, bb: "PF92", shockEye: 210, shockStroke: 50, seatTube: 31.6, wheel: "29", axle: "12x148", brakeMount: "PM180", price: 2599, color: "#274B6D" },
+  { id: "transition-sentinel", brand: "Transition", name: "Sentinel", travel: 160, bb: "BSA73", shockEye: 210, shockStroke: 55, seatTube: 31.6, wheel: "29", axle: "12x148", brakeMount: "PM180", price: 2999, color: "#7A3B2E" },
+  { id: "nukeproof-giga", brand: "Nukeproof", name: "Giga 297", travel: 170, bb: "PF92", shockEye: 230, shockStroke: 62.5, seatTube: 31.6, wheel: "mullet", axle: "12x157", brakeMount: "PM220", price: 2399, color: "#4A4A4A" },
+  { id: "specialized-enduro", brand: "Specialized", name: "Enduro", travel: 170, bb: "PF92", shockEye: 230, shockStroke: 65, seatTube: 34.9, wheel: "29", axle: "12x148", brakeMount: "PM200", price: 3199, color: "#1E1E1E" },
+  { id: "santacruz-megatower", brand: "Santa Cruz", name: "Megatower", travel: 160, bb: "PF92", shockEye: 230, shockStroke: 65, seatTube: 31.6, wheel: "29", axle: "12x148", brakeMount: "PM200", price: 3499, color: "#B08800" },
+  { id: "trek-slash", brand: "Trek", name: "Slash", travel: 160, bb: "BSA73", shockEye: 210, shockStroke: 55, seatTube: 31.6, wheel: "29", axle: "12x148", brakeMount: "PM180", price: 2899, color: "#8A1F1F" },
+  { id: "privateer-161", brand: "Privateer", name: "161", travel: 161, bb: "BSA73", shockEye: 210, shockStroke: 50, seatTube: 30.9, wheel: "mullet", axle: "12x157", brakeMount: "PM200", price: 1999, color: "#2E2E2E" },
+  { id: "commencal-supreme", brand: "Commencal", name: "Supreme DH V4", travel: 200, bb: "BSA73", shockEye: 222, shockStroke: 70, seatTube: 30.9, wheel: "mullet", axle: "12x157", brakeMount: "PM220", price: 3399, color: "#141414" },
+];
+
+const FORKS = [
+  { id: "zeb-ultimate", brand: "RockShox", name: "Zeb Ultimate 170", travel: 170, wheel: "29", axle: "15x110", price: 1099 },
+  { id: "fox38-factory", brand: "Fox", name: "38 Factory 170", travel: 170, wheel: "29", axle: "15x110", price: 1199 },
+  { id: "lyrik-ultimate", brand: "RockShox", name: "Lyrik Ultimate 160", travel: 160, wheel: "29", axle: "15x110", price: 949 },
+  { id: "fox36-factory", brand: "Fox", name: "36 Factory 160", travel: 160, wheel: "27.5", axle: "15x110", price: 999 },
+  { id: "ohlins-rxf38", brand: "Öhlins", name: "RXF38 m.2 180", travel: 180, wheel: "29", axle: "15x110", price: 1349 },
+  { id: "marzocchi-z1", brand: "Marzocchi", name: "Bomber Z1 170", travel: 170, wheel: "27.5", axle: "15x110", price: 799 },
+];
+
+const SHOCKS = [
+  { id: "sd-ultimate", brand: "RockShox", name: "Super Deluxe Ultimate", eye: 210, stroke: 55, price: 449 },
+  { id: "float-x2", brand: "Fox", name: "Float X2 Factory", eye: 230, stroke: 65, price: 599 },
+  { id: "ttx22m", brand: "Öhlins", name: "TTX22M", eye: 230, stroke: 62.5, price: 899 },
+  { id: "vivid-ultimate", brand: "RockShox", name: "Vivid Ultimate", eye: 230, stroke: 65, price: 649 },
+  { id: "dhx2", brand: "Fox", name: "DHX2 Factory (coil)", eye: 222, stroke: 70, price: 749 },
+  { id: "ext-storia", brand: "EXT", name: "Storia V3", eye: 210, stroke: 50, price: 799 },
+];
+
+const WHEELS = [
+  { id: "dt-ex1700", brand: "DT Swiss", name: "EX1700 Spline 29", wheel: "29", axle: "12x148", price: 899 },
+  { id: "cb-synthesis", brand: "Crankbrothers", name: "Synthesis Enduro", wheel: "29", axle: "12x148", price: 1599 },
+  { id: "i9-enduro-s", brand: "Industry Nine", name: "Enduro S 27.5", wheel: "27.5", axle: "12x157", price: 1799 },
+  { id: "rf-arc", brand: "Race Face", name: "Arc Offset 29", wheel: "29", axle: "12x148", price: 749 },
+  { id: "reserve-30-mullet", brand: "Reserve", name: "30|27.5 Mullet", wheel: "mullet", axle: "12x157", price: 1699 },
+  { id: "dt-fr1500-dh", brand: "DT Swiss", name: "FR1500 DH 27.5", wheel: "27.5", axle: "12x157", price: 1099 },
+];
+
+const BRAKES = [
+  { id: "saint", brand: "Shimano", name: "Saint M820", mount: "PM220", price: 349 },
+  { id: "code-rsc", brand: "SRAM", name: "Code RSC", mount: "PM200", price: 329 },
+  { id: "mt7", brand: "Magura", name: "MT7", mount: "PM180", price: 399 },
+  { id: "tech4-v4", brand: "Hope", name: "Tech 4 V4", mount: "PM200", price: 449 },
+  { id: "dhr-evo", brand: "TRP", name: "DH-R EVO", mount: "PM220", price: 379 },
+  { id: "xt-m8120", brand: "Shimano", name: "XT M8120 4-pistons", mount: "PM180", price: 259 },
+];
+
+const DRIVETRAINS = [
+  { id: "xx-sl-transmission", brand: "SRAM", name: "XX SL Eagle Transmission", price: 1699 },
+  { id: "gx-transmission", brand: "SRAM", name: "GX Eagle Transmission", price: 599 },
+  { id: "xt-12v", brand: "Shimano", name: "XT M8100 12v", price: 449 },
+  { id: "gx-standard", brand: "SRAM", name: "GX Eagle (dérailleur standard)", price: 349 },
+];
+
+const SEATPOSTS = [
+  { id: "oneup-v2", brand: "OneUp", name: "V2 Dropper", diameter: 31.6, price: 259 },
+  { id: "fox-transfer", brand: "Fox", name: "Transfer Factory", diameter: 31.6, price: 379 },
+  { id: "reverb-axs", brand: "RockShox", name: "Reverb AXS", diameter: 34.9, price: 599 },
+  { id: "bikeyoke-revive", brand: "BikeYoke", name: "Revive", diameter: 30.9, price: 349 },
+];
+
+const SADDLES = [
+  { id: "sdg-bel-air", brand: "SDG", name: "Bel-Air V3", price: 69 },
+  { id: "wtb-silverado", brand: "WTB", name: "Silverado", price: 89 },
+  { id: "specialized-bridge", brand: "Specialized", name: "Bridge Comp", price: 59 },
+];
+
+const MERCHANTS = ["Alltricks", "Probikeshop", "Bike-Discount"];
+function merchantLink(m, q) {
+  return "https://www.google.com/search?q=" + encodeURIComponent(m + " " + q);
+}
+
+// ---------- LOGIQUE DE COMPATIBILITÉ ----------
+
+function frameFrontWheel(frame) {
+  return frame.wheel === "mullet" ? "29" : frame.wheel;
+}
+function compatibleForks(frame) {
+  return FORKS.filter((f) => f.wheel === frameFrontWheel(frame));
+}
+function compatibleShocks(frame) {
+  return SHOCKS.filter((s) => s.eye === frame.shockEye && s.stroke === frame.shockStroke);
+}
+function compatibleWheels(frame) {
+  return WHEELS.filter((w) => w.wheel === frame.wheel && w.axle === frame.axle);
+}
+function compatibleBrakes(frame) {
+  return BRAKES.filter((b) => b.mount === frame.brakeMount);
+}
+function compatibleSeatposts(frame) {
+  // un diamètre inférieur passe avec une cale de réduction
+  return SEATPOSTS.filter((p) => p.diameter <= frame.seatTube);
+}
+
+const CATEGORIES = [
+  { key: "fork", label: "Fourche", getItems: compatibleForks, all: FORKS },
+  { key: "shock", label: "Amortisseur", getItems: compatibleShocks, all: SHOCKS },
+  { key: "wheels", label: "Roues", getItems: compatibleWheels, all: WHEELS },
+  { key: "brakes", label: "Freins", getItems: compatibleBrakes, all: BRAKES },
+  { key: "drivetrain", label: "Transmission", getItems: () => DRIVETRAINS, all: DRIVETRAINS },
+  { key: "seatpost", label: "Tige de selle", getItems: compatibleSeatposts, all: SEATPOSTS },
+  { key: "saddle", label: "Selle", getItems: () => SADDLES, all: SADDLES },
+];
+
+// Auth Supabase (projet "gravir-vtt")
+const SUPABASE_URL = "https://awqfdmhevdqlepqmhhss.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_pDKtP8gRUZinq8AAmCAPBA_TuCN2JWE";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function currentUser() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return null;
+  return { id: user.id, email: user.email, name: user.user_metadata?.name || user.email.split("@")[0] };
+}
+
+async function loginUser(email, password) {
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) return { ok: false, error: "E-mail ou mot de passe incorrect." };
+  return { ok: true };
+}
+
+async function getBuilds(userId) {
+  const { data, error } = await sb.from("builds").select("*").eq("user_id", userId).order("created_at", { ascending: false });
+  if (error) { console.error(error); return []; }
+  return data;
+}
+
+async function deleteBuildById(id) {
+  await sb.from("builds").delete().eq("id", id);
+}
+
+</script>
+<script>
+async function renderDash() {
+  const user = await currentUser();
+  if (!user) {
+    document.getElementById("loginView").style.display = "block";
+    document.getElementById("dashView").style.display = "none";
+    return;
+  }
+  document.getElementById("loginView").style.display = "none";
+  document.getElementById("dashView").style.display = "block";
+  document.getElementById("welcomeMsg").textContent = `Salut ${user.name}`;
+  document.getElementById("userEmail").textContent = user.email;
+
+  const builds = await getBuilds(user.id);
+  const list = document.getElementById("buildsList");
+  if (builds.length === 0) {
+    list.innerHTML = `<p class="empty">Aucun build enregistré pour l'instant. <a href="configurateur.html" style="color:var(--accent);">Lancez le configurateur</a> pour en créer un.</p>`;
+    return;
+  }
+  list.innerHTML = "";
+  builds.forEach((build) => {
+    const frame = FRAMES.find((f) => f.id === build.frame_id);
+    const card = document.createElement("div");
+    card.className = "build-card";
+    card.innerHTML = `
+      <div class="top">
+        <div>
+          <div class="date">${new Date(build.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</div>
+          <strong>${frame ? frame.brand + " " + frame.name : "Cadre"}</strong>
+        </div>
+        <div class="total">${Number(build.total).toLocaleString("fr-FR")} €</div>
+      </div>
+      <ul>${build.items.map((i) => `<li>${i.label} — ${i.brand} ${i.name}</li>`).join("")}</ul>
+      <button class="del">Supprimer</button>
+    `;
+    card.querySelector(".del").onclick = async () => {
+      await deleteBuildById(build.id);
+      renderDash();
+    };
+    list.appendChild(card);
+  });
+}
+
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+  const res = await loginUser(email, password);
+  const errBox = document.getElementById("loginError");
+  if (!res.ok) {
+    errBox.innerHTML = `<div class="form-error">${res.error}</div>`;
+    return;
+  }
+  errBox.innerHTML = "";
+  renderDash();
+});
+
+document.getElementById("logoutBtn").onclick = async () => {
+  await sb.auth.signOut();
+  renderDash();
+};
+
+renderDash();
+</script>
+</body>
+</html>
