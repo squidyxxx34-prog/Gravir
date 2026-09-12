@@ -210,16 +210,18 @@ button { font-family: inherit; }
 }
 .big-card:hover { transform: translateY(-4px); border-color: #565a4a; }
 .big-card.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 16px 34px -14px rgba(196,98,45,.5); }
-.big-card .art {
+.art-box {
   position: relative;
-  height: 168px;
+  overflow: hidden;
   display: flex; align-items: center; justify-content: center;
   background: linear-gradient(160deg, #2E3126, #1B1D18);
-  overflow: hidden;
 }
-.big-grid.frame-grid .art { height: 200px; }
-.art-glow { position: absolute; width: 180px; height: 180px; border-radius: 50%; filter: blur(38px); opacity: .55; }
-.big-card .art svg { width: 64%; height: 64%; position: relative; z-index: 1; }
+.art-box.size-lg { height: 168px; }
+.big-grid.frame-grid .art-box.size-lg { height: 200px; }
+.art-glow { position: absolute; inset: -30%; border-radius: 50%; filter: blur(24px); opacity: .5; }
+.art-box svg { width: 64%; height: 64%; position: relative; z-index: 1; }
+.art-box.size-sm { width: 64px; height: 64px; border-radius: 6px; flex-shrink: 0; }
+.art-box.size-sm svg { width: 60%; height: 60%; }
 .big-card .check-badge {
   position: absolute; top: 12px; right: 12px; z-index: 2;
   width: 26px; height: 26px; border-radius: 50%;
@@ -248,8 +250,6 @@ button { font-family: inherit; }
   border: 1px solid var(--line); background: var(--panel);
   border-radius: 8px; padding: 12px 16px;
 }
-.summary-row .art { width: 64px; height: 64px; border-radius: 6px; flex-shrink: 0; }
-.summary-row .art svg { width: 60%; height: 60%; }
 .summary-row .meta { flex: 1; min-width: 0; }
 .summary-row .meta .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
 .summary-row .meta .name { font-size: 15px; font-weight: 600; }
@@ -291,15 +291,15 @@ button { font-family: inherit; }
   .wizard-main { padding: 28px 16px 150px; }
   .step-title { font-size: 28px; }
   .big-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .big-card .art { height: 110px; }
-  .big-grid.frame-grid .art { height: 140px; }
+  .big-card .art-box.size-lg { height: 110px; }
+  .big-grid.frame-grid .art-box.size-lg { height: 140px; }
   .big-card .info { padding: 10px 12px; }
   .big-card .name { font-size: 14px; margin: 2px 0 6px; }
   .big-card .price-row .amount { font-size: 16px; }
   .bottom-bar { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); flex-wrap: wrap; }
   .bb-amount { font-size: 22px; }
   .summary-row { padding: 10px 12px; gap: 10px; }
-  .summary-row .art { width: 48px; height: 48px; }
+  .summary-row .art-box.size-sm { width: 48px; height: 48px; }
 }
 @media (max-width: 380px) {
   .big-grid { grid-template-columns: 1fr; }
@@ -540,8 +540,8 @@ function totalPrice() {
 }
 
 function artBlock(catKey, tint, size) {
-  size = size || "big";
-  return `<div class="art"><div class="art-glow" style="background:${tint}"></div><div style="color:${tint};position:relative;z-index:1;display:flex;width:100%;height:100%;align-items:center;justify-content:center;">${CAT_ART[catKey] || ""}</div></div>`;
+  const sizeClass = size === "sm" ? "size-sm" : "size-lg";
+  return `<div class="art-box ${sizeClass}"><div class="art-glow" style="background:${tint}"></div><div style="color:${tint};position:relative;z-index:1;display:flex;width:100%;height:100%;align-items:center;justify-content:center;">${CAT_ART[catKey] || ""}</div></div>`;
 }
 
 // ---------- ÉCRAN DE SÉLECTION ----------
@@ -605,7 +605,7 @@ function renderStep() {
       const row = document.createElement("div");
       row.className = "summary-row";
       row.innerHTML = `
-        ${artBlock(item.catKey, tint).replace('class="art"', 'class="art" style="width:64px;height:64px;border-radius:6px;flex-shrink:0;"')}
+        ${artBlock(item.catKey, tint, "sm")}
         <div class="meta">
           <div class="label">${item.label} — ${item.brand}</div>
           <div class="name">${item.name}</div>

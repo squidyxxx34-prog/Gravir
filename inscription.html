@@ -201,7 +201,10 @@ const SUPABASE_ANON_KEY = "sb_publishable_pDKtP8gRUZinq8AAmCAPBA_TuCN2JWE";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 async function registerUser(name, email, password) {
-  const { data, error } = await sb.auth.signUp({ email, password, options: { data: { name } } });
+  const { data, error } = await sb.auth.signUp({
+    email, password,
+    options: { data: { name }, emailRedirectTo: "https://gravir.vercel.app/compte.html" },
+  });
   if (error) return { ok: false, error: error.message };
   return { ok: true, needsConfirmation: !data.session };
 }
