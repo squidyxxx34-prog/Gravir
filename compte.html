@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Mon compte — Gravir</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -18,6 +18,7 @@
 }
 
 * { box-sizing: border-box; }
+html, body { overflow-x: hidden; }
 
 html, body {
   margin: 0;
@@ -224,16 +225,16 @@ a { color: inherit; }
 // Specs approximatives (géométrie publique constructeur, à vérifier/enrichir avant prod)
 
 const FRAMES = [
-  { id: "commencal-meta-am", brand: "Commencal", name: "Meta AM 29", travel: 150, bb: "BSA73", shockEye: 210, shockStroke: 55, seatTube: 31.6, wheel: "29", axle: "12x148", brakeMount: "PM180", price: 2199, color: "#C4622D" },
-  { id: "yt-capra", brand: "YT", name: "Capra 29", travel: 170, bb: "BSA73", shockEye: 230, shockStroke: 65, seatTube: 31.6, wheel: "29", axle: "12x148", brakeMount: "PM180", price: 2799, color: "#3D6E4F" },
-  { id: "canyon-strive", brand: "Canyon", name: "Strive", travel: 150, bb: "PF92", shockEye: 210, shockStroke: 50, seatTube: 31.6, wheel: "29", axle: "12x148", brakeMount: "PM180", price: 2599, color: "#274B6D" },
-  { id: "transition-sentinel", brand: "Transition", name: "Sentinel", travel: 160, bb: "BSA73", shockEye: 210, shockStroke: 55, seatTube: 31.6, wheel: "29", axle: "12x148", brakeMount: "PM180", price: 2999, color: "#7A3B2E" },
-  { id: "nukeproof-giga", brand: "Nukeproof", name: "Giga 297", travel: 170, bb: "PF92", shockEye: 230, shockStroke: 62.5, seatTube: 31.6, wheel: "mullet", axle: "12x157", brakeMount: "PM220", price: 2399, color: "#4A4A4A" },
-  { id: "specialized-enduro", brand: "Specialized", name: "Enduro", travel: 170, bb: "PF92", shockEye: 230, shockStroke: 65, seatTube: 34.9, wheel: "29", axle: "12x148", brakeMount: "PM200", price: 3199, color: "#1E1E1E" },
-  { id: "santacruz-megatower", brand: "Santa Cruz", name: "Megatower", travel: 160, bb: "PF92", shockEye: 230, shockStroke: 65, seatTube: 31.6, wheel: "29", axle: "12x148", brakeMount: "PM200", price: 3499, color: "#B08800" },
-  { id: "trek-slash", brand: "Trek", name: "Slash", travel: 160, bb: "BSA73", shockEye: 210, shockStroke: 55, seatTube: 31.6, wheel: "29", axle: "12x148", brakeMount: "PM180", price: 2899, color: "#8A1F1F" },
-  { id: "privateer-161", brand: "Privateer", name: "161", travel: 161, bb: "BSA73", shockEye: 210, shockStroke: 50, seatTube: 30.9, wheel: "mullet", axle: "12x157", brakeMount: "PM200", price: 1999, color: "#2E2E2E" },
-  { id: "commencal-supreme", brand: "Commencal", name: "Supreme DH V4", travel: 200, bb: "BSA73", shockEye: 222, shockStroke: 70, seatTube: 30.9, wheel: "mullet", axle: "12x157", brakeMount: "PM220", price: 3399, color: "#141414" },
+  { id: "commencal-meta-am", brand: "Commencal", name: "Meta AM 29", category: "enduro", travel: 150, bb: "BSA73", shockEye: 210, shockStroke: 55, seatTube: 31.6, wheel: "29", axle: "12x148", brakeMount: "PM180", price: 2199, color: "#C4622D" },
+  { id: "transition-sentinel", brand: "Transition", name: "Sentinel", category: "enduro", travel: 160, bb: "BSA73", shockEye: 210, shockStroke: 55, seatTube: 31.6, wheel: "29", axle: "12x148", brakeMount: "PM180", price: 2999, color: "#7A3B2E" },
+  { id: "nukeproof-giga", brand: "Nukeproof", name: "Giga 297", category: "enduro", travel: 170, bb: "PF92", shockEye: 230, shockStroke: 62.5, seatTube: 31.6, wheel: "mullet", axle: "12x157", brakeMount: "PM220", price: 2399, color: "#4A4A4A" },
+  { id: "santacruz-megatower", brand: "Santa Cruz", name: "Megatower", category: "enduro", travel: 160, bb: "PF92", shockEye: 230, shockStroke: 65, seatTube: 31.6, wheel: "29", axle: "12x148", brakeMount: "PM200", price: 3499, color: "#B08800" },
+  { id: "privateer-161", brand: "Privateer", name: "161", category: "enduro", travel: 161, bb: "BSA73", shockEye: 210, shockStroke: 50, seatTube: 30.9, wheel: "mullet", axle: "12x157", brakeMount: "PM200", price: 1999, color: "#2E2E2E" },
+  { id: "banshee-rune", brand: "Banshee", name: "Rune V3", category: "enduro", travel: 160, bb: "BSA73", shockEye: 230, shockStroke: 65, seatTube: 31.6, wheel: "29", axle: "12x148", brakeMount: "PM180", price: 1249, color: "#5A3E7A" },
+  { id: "raaw-madonna", brand: "RAAW", name: "Madonna V3", category: "enduro", travel: 170, bb: "BSA73", shockEye: 210, shockStroke: 55, seatTube: 31.6, wheel: "29", axle: "12x148", brakeMount: "PM180", price: 2399, color: "#D9A31C" },
+  { id: "commencal-supreme", brand: "Commencal", name: "Supreme DH V4", category: "dh", travel: 200, bb: "BSA73", shockEye: 222, shockStroke: 70, seatTube: 30.9, wheel: "mullet", axle: "12x157", brakeMount: "PM220", price: 3399, color: "#141414" },
+  { id: "nukeproof-dissent", brand: "Nukeproof", name: "Dissent Carbon", category: "dh", travel: 200, bb: "BSA83", shockEye: 250, shockStroke: 75, seatTube: 31.6, wheel: "mullet", axle: "12x157", brakeMount: "PM220", price: 1899, color: "#242424" },
+  { id: "banshee-legend", brand: "Banshee", name: "Legend", category: "dh", travel: 200, bb: "BSA73", shockEye: 222, shockStroke: 70, seatTube: 30.9, wheel: "mullet", axle: "12x157", brakeMount: "PM220", price: 1499, color: "#3E2A5A" },
 ];
 
 const FORKS = [
