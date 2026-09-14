@@ -40,30 +40,53 @@ a { color: inherit; }
 
 /* ---------- Header / nav ---------- */
 .site-header {
+  background: var(--bg);
   border-bottom: 1px solid var(--line);
-  padding: 18px 28px;
+  padding: 16px 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
+  gap: 20px;
+  position: relative;
+  z-index: 60;
 }
-.logo { font-size: 26px; }
-.logo span { color: var(--accent); }
-.site-nav { display: flex; gap: 22px; align-items: center; }
+.logo { font-size: 24px; display: flex; align-items: center; gap: 7px; white-space: nowrap; text-decoration: none; }
+.logo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; }
+.site-nav { display: flex; align-items: center; gap: 30px; }
 .site-nav a {
   text-decoration: none;
   font-size: 14px;
   color: var(--muted);
+  white-space: nowrap;
+  padding: 4px 0;
+  position: relative;
   transition: color .15s;
 }
+.site-nav a::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: -3px;
+  height: 2px; background: var(--accent);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .2s;
+}
 .site-nav a:hover, .site-nav a.active { color: var(--text); }
+.site-nav a.active::after { transform: scaleX(1); }
 .nav-cta {
   background: var(--accent);
   color: #fff !important;
-  padding: 8px 16px;
-  border-radius: 2px;
+  padding: 9px 18px;
+  border-radius: 3px;
+  font-weight: 600;
 }
+.nav-cta::after { display: none; }
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none; border: none; cursor: pointer; padding: 8px;
+}
+.nav-toggle span { width: 22px; height: 2px; background: var(--text); display: block; border-radius: 2px; }
 
 /* ---------- Buttons ---------- */
 .btn {
@@ -168,8 +191,20 @@ a { color: inherit; }
 
   @media (max-width: 560px) {
     .site-header { padding: 14px 18px; }
-    .site-nav { gap: 12px; width: 100%; justify-content: space-between; }
-    .logo { font-size: 22px; }
+    .logo { font-size: 21px; }
+    .nav-toggle { display: flex; }
+    .site-nav {
+      display: none;
+      position: absolute; top: 100%; left: 0; right: 0;
+      flex-direction: column; align-items: stretch; gap: 0;
+      background: var(--bg); border-bottom: 1px solid var(--line);
+      padding: 6px 18px 18px;
+    }
+    .site-nav.open { display: flex; }
+    .site-nav a { padding: 13px 0; border-bottom: 1px solid var(--line); }
+    .site-nav a::after { display: none; }
+    .site-nav a.active { color: var(--accent); }
+    .nav-cta { text-align: center; margin-top: 10px; }
     main { padding: 32px 18px; }
     .form-card { padding: 22px; }
     .dash-head { flex-direction: column; align-items: flex-start; gap: 12px; }
@@ -182,14 +217,44 @@ a { color: inherit; }
 <body>
 
 <header class="site-header">
-  <a href="index.html" class="logo">GRAVIR <span>·</span></a>
-  <nav class="site-nav">
+  <a href="index.html" class="logo">GRAVIR<span class="logo-dot"></span></a>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <nav class="site-nav" id="siteNav">
     <a href="index.html">Accueil</a>
     <a href="configurateur.html">Configurateur</a>
     <a href="compte.html" class="active">Mon compte</a>
-    <a href="inscription.html" class="nav-cta">Inscription</a>
+    <a href="inscription.html" id="navCta" class="nav-cta">Inscription</a>
   </nav>
 </header>
+<script>
+document.getElementById("navToggle").addEventListener("click", () => {
+  document.getElementById("siteNav").classList.toggle("open");
+});
+</script>
+<script>
+(async function () {
+  try {
+    const _navSb = window.supabase.createClient(
+      "https://awqfdmhevdqlepqmhhss.supabase.co",
+      "sb_publishable_pDKtP8gRUZinq8AAmCAPBA_TuCN2JWE"
+    );
+    const { data: { user } } = await _navSb.auth.getUser();
+    const cta = document.getElementById("navCta");
+    if (user && cta) {
+      cta.textContent = "Se déconnecter";
+      cta.removeAttribute("href");
+      cta.style.cursor = "pointer";
+      cta.addEventListener("click", async (e) => {
+        e.preventDefault();
+        await _navSb.auth.signOut();
+        window.location.href = "index.html";
+      });
+    }
+  } catch (e) { console.error(e); }
+})();
+</script>
 
 <main>
   <!-- Formulaire de connexion -->

@@ -43,29 +43,51 @@ button { font-family: inherit; }
 .site-header {
   background: var(--bg);
   border-bottom: 1px solid var(--line);
-  padding: 18px 28px;
+  padding: 16px 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
+  gap: 20px;
+  position: relative;
+  z-index: 60;
 }
-.logo { font-size: 26px; }
-.logo span { color: var(--accent); }
-.site-nav { display: flex; gap: 22px; align-items: center; }
+.logo { font-size: 24px; display: flex; align-items: center; gap: 7px; white-space: nowrap; text-decoration: none; }
+.logo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; }
+.site-nav { display: flex; align-items: center; gap: 30px; }
 .site-nav a {
   text-decoration: none;
   font-size: 14px;
   color: var(--muted);
+  white-space: nowrap;
+  padding: 4px 0;
+  position: relative;
   transition: color .15s;
 }
+.site-nav a::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: -3px;
+  height: 2px; background: var(--accent);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .2s;
+}
 .site-nav a:hover, .site-nav a.active { color: var(--text); }
+.site-nav a.active::after { transform: scaleX(1); }
 .nav-cta {
   background: var(--accent);
   color: #fff !important;
-  padding: 8px 16px;
-  border-radius: 2px;
+  padding: 9px 18px;
+  border-radius: 3px;
+  font-weight: 600;
 }
+.nav-cta::after { display: none; }
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none; border: none; cursor: pointer; padding: 8px;
+}
+.nav-toggle span { width: 22px; height: 2px; background: var(--text); display: block; border-radius: 2px; }
 
 /* ---------- Buttons ---------- */
 .btn {
@@ -258,6 +280,31 @@ button { font-family: inherit; }
 .summary-row .amount { font-family: 'Barlow Condensed'; font-weight: 700; font-size: 19px; white-space: nowrap; }
 .summary-msg { text-align: center; font-size: 13px; color: var(--muted); margin-top: 14px; }
 
+/* ---- Pop-up de confirmation ---- */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,.6);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  animation: fadeIn .15s ease-out;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal-card {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+  padding: 30px 26px; max-width: 340px; width: 100%; text-align: center;
+  animation: popIn .18s ease-out;
+}
+@keyframes popIn { from { transform: scale(.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.modal-icon {
+  width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px; font-size: 24px; font-weight: 700;
+}
+.modal-icon.success { background: #2E4A2E; color: #8FD98F; }
+.modal-icon.error { background: #4A2A22; color: #F2A98A; }
+.modal-title { font-size: 21px; margin-bottom: 8px; }
+.modal-text { font-size: 14px; color: var(--muted); margin-bottom: 22px; line-height: 1.5; }
+
 /* ---- Sticky bottom price bar ---- */
 .bottom-bar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
@@ -279,8 +326,20 @@ button { font-family: inherit; }
 }
 @media (max-width: 640px) {
   .site-header { padding: 14px 18px; }
-  .site-nav { gap: 12px; width: 100%; justify-content: space-between; }
-  .logo { font-size: 22px; }
+  .logo { font-size: 21px; }
+  .nav-toggle { display: flex; }
+  .site-nav {
+    display: none;
+    position: absolute; top: 100%; left: 0; right: 0;
+    flex-direction: column; align-items: stretch; gap: 0;
+    background: var(--bg); border-bottom: 1px solid var(--line);
+    padding: 6px 18px 18px;
+  }
+  .site-nav.open { display: flex; }
+  .site-nav a { padding: 13px 0; border-bottom: 1px solid var(--line); }
+  .site-nav a::after { display: none; }
+  .site-nav a.active { color: var(--accent); }
+  .nav-cta { text-align: center; margin-top: 10px; }
   .select-screen { padding: 32px 16px; gap: 28px; min-height: calc(100dvh - 110px); }
   .select-intro h1 { font-size: 34px; }
   .select-grid { grid-template-columns: 1fr; }
@@ -309,14 +368,44 @@ button { font-family: inherit; }
 <body>
 
 <header class="site-header">
-  <a href="index.html" class="logo">GRAVIR <span>·</span></a>
-  <nav class="site-nav">
+  <a href="index.html" class="logo">GRAVIR<span class="logo-dot"></span></a>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <nav class="site-nav" id="siteNav">
     <a href="index.html">Accueil</a>
     <a href="configurateur.html" class="active">Configurateur</a>
     <a href="compte.html">Mon compte</a>
-    <a href="inscription.html" class="nav-cta">Inscription</a>
+    <a href="inscription.html" id="navCta" class="nav-cta">Inscription</a>
   </nav>
 </header>
+<script>
+document.getElementById("navToggle").addEventListener("click", () => {
+  document.getElementById("siteNav").classList.toggle("open");
+});
+</script>
+<script>
+(async function () {
+  try {
+    const _navSb = window.supabase.createClient(
+      "https://awqfdmhevdqlepqmhhss.supabase.co",
+      "sb_publishable_pDKtP8gRUZinq8AAmCAPBA_TuCN2JWE"
+    );
+    const { data: { user } } = await _navSb.auth.getUser();
+    const cta = document.getElementById("navCta");
+    if (user && cta) {
+      cta.textContent = "Se déconnecter";
+      cta.removeAttribute("href");
+      cta.style.cursor = "pointer";
+      cta.addEventListener("click", async (e) => {
+        e.preventDefault();
+        await _navSb.auth.signOut();
+        window.location.href = "index.html";
+      });
+    }
+  } catch (e) { console.error(e); }
+})();
+</script>
 
 <section id="selectScreen" class="select-screen">
   <div class="select-intro">
@@ -595,7 +684,6 @@ function renderStep() {
       <h2 class="step-title">${meta.title}</h2>
       <p class="step-sub">${meta.sub}</p>
       <div class="summary-list" id="summaryList"></div>
-      <p class="summary-msg" id="saveMsg"></p>
     `;
     const list = document.getElementById("summaryList");
     items.forEach((item) => {
@@ -720,26 +808,37 @@ function renderBottomBar() {
   }
 }
 
+function showModal(title, text, success) {
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  overlay.innerHTML = `
+    <div class="modal-card">
+      <div class="modal-icon ${success ? "success" : "error"}">${success ? "✓" : "!"}</div>
+      <h3 class="modal-title">${title}</h3>
+      <p class="modal-text">${text}</p>
+      <button class="btn btn-accent" style="width:100%;" id="modalCloseBtn">OK</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  const close = () => overlay.remove();
+  overlay.querySelector("#modalCloseBtn").onclick = close;
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+}
+
 async function onSaveBuild() {
-  const msg = document.getElementById("saveMsg");
   const user = await currentUser();
   if (!user) {
-    msg.textContent = "Connecte-toi pour enregistrer ce build.";
-    msg.style.color = "#C4622D";
+    showModal("Connexion requise", "Connecte-toi pour enregistrer ce build.", false);
     return;
   }
-  msg.textContent = "Enregistrement…";
-  msg.style.color = "var(--muted)";
   const items = chosenItems();
   const total = totalPrice();
   const res = await saveBuild(user.id, { frameId, items, total });
   if (!res.ok) {
-    msg.textContent = "Erreur : " + res.error;
-    msg.style.color = "#C4622D";
+    showModal("Échec de l'enregistrement", "Le build n'a pas pu être enregistré : " + res.error, false);
     return;
   }
-  msg.textContent = "Build enregistré dans ton compte.";
-  msg.style.color = "var(--muted)";
+  showModal("Build enregistré", "Ton build est bien enregistré dans ton compte, retrouvable dans « Mon compte ».", true);
 }
 </script>
 </body>
